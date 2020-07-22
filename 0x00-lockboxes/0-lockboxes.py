@@ -22,6 +22,7 @@ def canUnlockAll(boxes):
         return True
     return False
 
+
 def go_open(open_me, boxes, unlocked_lst):
     """Opens a single box, and check it as unlocked in unlocked_list."""
 
