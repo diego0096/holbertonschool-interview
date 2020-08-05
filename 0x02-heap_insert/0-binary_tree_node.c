@@ -2,11 +2,10 @@
 #include <stdlib.h>
 
 /**
- * binary_tree_node - add a node to a max heap
- * @parent: parent of node to be added
- * @value: value of node to add
- *
- * Return: address of new node, or NULL on failure
+ * binary_tree_node - Creates a binary tree node from a parent
+ * @parent: Parent of the new node
+ * @value: Value to stored in the new node
+ * Return: Pointer to new node. (NULL) in case of failure
  */
 
 binary_tree_t *binary_tree_node(binary_tree_t *parent, int value)
@@ -25,4 +24,3 @@ binary_tree_t *binary_tree_node(binary_tree_t *parent, int value)
 
 	return (new_node);
 }
-

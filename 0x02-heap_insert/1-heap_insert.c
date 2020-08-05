@@ -1,68 +1,143 @@
-#include <stdlib.h>
 #include "binary_trees.h"
-
 /**
- * _find_insert_parent - find parent where to insert heap node
- *
- * @node: node being examined
- * @depth: depth node is at
- *
- * Return: address of parent
- */
-node_depth _find_insert_parent(heap_t *node, size_t depth)
+ * binary_tree_sibling - which is the sibling?
+ * @node: pointer to the node
+ * Return: pointer to sibling
+ **/
+binary_tree_t *binary_tree_sibling(binary_tree_t *node)
 {
-	node_depth ret, ret2;
-
-	if (node->left == NULL || node->right == NULL)
-	{
-		ret.node = node;
-		ret.depth = depth;
-		return (ret);
-	}
-
-	ret = _find_insert_parent(node->left, depth + 1);
-	ret2 = _find_insert_parent(node->right, depth + 1);
-	if (ret.depth != ret2.depth)
-		return (ret2);
+	if (!node || !node->parent)
+		return (NULL);
+	if (!node->parent->left || !node->parent->right)
+		return (NULL);
+	if (node->n == node->parent->left->n)
+		return (node->parent->right);
 	else
-		return (ret);
+		return (node->parent->left);
 }
-
 /**
- * _swap - swap a node with its parent
- *
- * @node: node to swap with its parent
- */
-void _swap(heap_t *node)
+ * binary_tree_is_leaf - checks if a node is a leaf
+ * @node: pointer to node to verify is a leaf
+ * Return: 1 if node is a leaf, otherwise 0
+ **/
+int binary_tree_is_leaf(const binary_tree_t *node)
 {
-	heap_t *swap, *parent;
+	if (!node)
+		return (0);
+	if (!node->left && !node->right)
+		return (1);
+	else
+		return (0);
+}
+/**
+ * swaps - swaps number to be a heap
+ * @node: pointer to the node input
+ * Return: pointer to node output
+ **/
+heap_t *swaps(heap_t *node)
+{
+	int aux;
 
-	parent = node->parent;
-	if (node->left != NULL)
-		node->left->parent = parent;
-	if (node->right != NULL)
-		node->right->parent = parent;
-	if (parent->left != NULL)
-		parent->left->parent = node;
-	if (parent->right != NULL)
-		parent->right->parent = node;
-	swap = node->left;
-	node->left = parent->left;
-	parent->left = swap;
-	swap = node->right;
-	node->right = parent->right;
-	parent->right = swap;
-	if (node == node->left)
-		node->left = parent;
-	if (node == node->right)
-		node->right = parent;
-	if (parent->parent != NULL)
+	while (node->parent && node->parent->n < node->n)
 	{
-		if (parent->parent->left == parent)
-			parent->parent->left = node;
-		if (parent->parent->right == parent)
-			parent->parent->right = node;
+		aux = node->n;
+		node->n = node->parent->n;
+		node->parent->n = aux;
+		node = node->parent;
 	}
-	node->parent = parent->parent;
-	parent->parent = node;
+	return (node);
+}
+/**
+ * preorder - goes through a binary tree using pre-order traversal
+ * @last_node: double pointer to find the last node
+ * @tree: pointer to the root
+ * @level: level to print
+ * @ref: reference to start
+ * @mark: only work for first match
+ * Return: no return. Returns nothing
+ **/
+void preorder(heap_t *tree, int level, int ref, heap_t **last_node, int *mark)
+{
+	if (!tree)
+		return;
+	if (level == ref)
+	{
+		last_node[0] = tree;
+	}
+	if (level - 1 == ref && binary_tree_is_leaf(tree) == 1 && *mark == 0)
+	{
+		last_node[1] = tree;
+		*mark = 1;
+	}
+	if (tree->left)
+		preorder(tree->left, level, ref + 1, last_node, mark);
+	if (tree->right)
+		preorder(tree->right, level, ref + 1, last_node, mark);
+}
+/**
+ * levelorder - traverses in zig-zag
+ * @tree: pointer to the root
+ * @last_node: last node in the tree
+ * Return: no return
+ **/
+void levelorder(heap_t *tree, heap_t **last_node)
+{
+	int h, i, mark = 0;
+
+	if (!tree)
+		return;
+	h = height(tree);
+	for (i = 0; i <= h; i++)
+	{
+		preorder(tree, i, 0, last_node, &mark);
+	}
+}
+/**
+ * heap_insert - nserts a value into a Max Binary Heap
+ * @root: double pointer to the root node of the Heap
+ * @value: the value store in the node to be inserted
+ * Return: pointer to the inserted node, or NULL on failure
+ */
+heap_t *heap_insert(heap_t **root, int value)
+{
+	heap_t *tree, *first_row_node, **last_node, *insert_node, *aux;
+
+	if (!root)
+		return (NULL);
+	tree = *root;
+	if (!tree)
+	{
+		*root = binary_tree_node(tree, value);
+		return (*root);
+	}
+	aux = *root;
+	first_row_node = *root;
+	last_node = malloc(sizeof(heap_t *) * 2);
+	last_node[0] = *root;
+	last_node[1] = *root;
+	levelorder(tree, last_node);
+	while (first_row_node->left)
+		first_row_node = first_row_node->left;
+	if (first_row_node == *last_node && first_row_node->parent == NULL)
+	{
+		insert_node = binary_tree_insert_left(first_row_node, value);
+		insert_node = swaps(insert_node);
+		free(last_node);
+		*root = aux;
+		return (insert_node);
+	}
+	*root = aux;
+	if (binary_tree_sibling(*last_node))
+	{
+		if (!binary_tree_is_perfect(*root))
+			insert_node = binary_tree_insert_left(last_node[1], value);
+		else
+			insert_node = binary_tree_insert_left(first_row_node, value);
+	}
+	else
+		insert_node = binary_tree_insert_right(last_node[0]->parent, value);
+	insert_node = swaps(insert_node);
+	free(last_node);
+	*root = aux;
+	return (insert_node);
 }
