@@ -46,8 +46,7 @@ void sandpiles_sum(int grid1[3][3], int grid2[3][3])
 /**
  * is_stable - Check if any cell is bigger than 3
  * @grid1: grid to be verified
- * Return
- *
+ * Return: True or False
  */
 int is_stable(int grid1[3][3])
 {
