@@ -1,50 +1,45 @@
 #!/usr/bin/python3
-"""Get ALL hot posts"""
-
-
-import pprint
-import re
+"""keywords titles of all hot articles"""
 import requests
+import sys
 
 
-BASE_URL = 'http://reddit.com/r/{}/hot.json'
-
-
-def count_words(subreddit, word_list, hot_list=[], after=None):
-    '''Get ALL hot posts'''
-    headers = {'User-agent': 'Unix:0-subs:v1'}
-    params = {'limit': 100}
-    if isinstance(after, str):
-        if after != "STOP":
-            params['after'] = after
-        else:
-            return print_results(word_list, hot_list)
-    response = requests.get(BASE_URL.format(subreddit),
-                            headers=headers, params=params)
-    if response.status_code != 200:
-        return None
-    data = response.json().get('data', {})
-    after = data.get('after', 'STOP')
-    if not after:
-        after = "STOP"
-    hot_list = hot_list + [post.get('data', {}).get('title')
-                           for post in data.get('children', [])]
-    return count_words(subreddit, word_list, hot_list, after)
-
-
-def print_results(word_list, hot_list):
-    '''Prints request results'''
-    count = {}
-    for word in word_list:
-        count[word] = 0
-    for title in hot_list:
+def count_words(subreddit, word_list, kw_cont={}, next_pg=None, reap_kw={}):
+    """all hot posts by keyword"""
+    headers = {"User-Agent": "julgachancipa"}
+    if next_pg:
+        subRhot = requests.get('https://reddit.com/r/' + subreddit +
+                               '/hot.json?after=' + next_pg,
+                               headers=headers)
+    else:
+        subRhot = requests.get('https://reddit.com/r/' + subreddit +
+                               '/hot.json', headers=headers)
+    if subRhot.status_code == 404:
+        return
+    if kw_cont == {}:
         for word in word_list:
-            for title_word in title.lower().split():
-                if title_word == word.lower():
-                    count[word] += 1
-
-    count = {k: v for k, v in count.items() if v > 0}
-    words = list(count.keys())
-    for word in sorted(words,
-                       reverse=True, key=lambda k: count[k]):
-        print("{}: {}".format(word, count[word]))
+            kw_cont[word] = 0
+            reap_kw[word] = word_list.count(word)
+    subRhot_dict = subRhot.json()
+    subRhot_data = subRhot_dict['data']
+    next_pg = subRhot_data['after']
+    subRhot_posts = subRhot_data['children']
+    for post in subRhot_posts:
+        post_data = post['data']
+        post_title = post_data['title']
+        title_words = post_title.split()
+        for w in title_words:
+            for key in kw_cont:
+                if w.lower() == key.lower():
+                    kw_cont[key] += 1
+    if next_pg:
+        count_words(subreddit, word_list, kw_cont, next_pg, reap_kw)
+    else:
+        for key, val in reap_kw.items():
+            if val > 1:
+                kw_cont[key] *= val
+        sorted_abc = sorted(kw_cont.items(), key=lambda x: x[0])
+        sorted_res = sorted(sorted_abc, key=lambda x: (-x[1], x[0]))
+        for res in sorted_res:
+            if res[1] > 0:
+                print('{}: {}'.format(res[0], res[1]))
