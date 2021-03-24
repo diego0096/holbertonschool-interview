@@ -4,13 +4,12 @@
 #include <limits.h>
 
 /**
- * is_binary_search_tree - checks if tree is a binary search tree
- * @node: current node being checked
- * @min: integer indicating the left boundary of the current node's value
- * @max: integer indicating the right boundary of the current node's value
- * @height: height of the current binary tree level
- * (curr value needs to be <= max and >= min)
- * Return: 1 if tree is a valid BST otherwise 0
+ * is_binary_search_tree - Checks if tree is a binary search tree
+ * @node: Current node being checked
+ * @min: Integer indicating the left boundary
+ * @max: Integer indicating the right boundary
+ * @height: Height of the current binary tree level
+ * Return: 1 if tree is a valid BST
  */
 int is_binary_search_tree(const binary_tree_t *node, int min, int max,
 		int *height)
@@ -20,10 +19,8 @@ int is_binary_search_tree(const binary_tree_t *node, int min, int max,
 
 	if (!node)
 		return (1);
-
 	if (node->n >= max || node->n <= min)
 		return (0);
-
 	if (!is_binary_search_tree(node->left, min, node->n, &left_h) ||
 			!is_binary_search_tree(node->right, node->n,
 				max, &right_h))
@@ -33,9 +30,9 @@ int is_binary_search_tree(const binary_tree_t *node, int min, int max,
 }
 
 /**
- * binary_tree_is_avl - checks if a binary tree is a valid AVL Tree
- * @tree: pointer tot the root node of the tree to check
- * Return: 1 if tree is a valid AVL, otherwise 0
+ * binary_tree_is_avl - Checks if a binary tree is a valid AVL Tree
+ * @tree: Pointer to the root node
+ * Return: 1 if tree is a valid AVL
  */
 int binary_tree_is_avl(const binary_tree_t *tree)
 {

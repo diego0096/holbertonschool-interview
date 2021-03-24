@@ -1,7 +1,8 @@
-#ifndef _TREE
-#define _TREE
-#include <stdlib.h>
-#include <stdio.h>
+#ifndef _BINARY_TREES_H_
+#define _BINARY_TREES_H_
+
+#include <stddef.h>
+
 /**
  * struct binary_tree_s - Binary tree node
  *
@@ -17,10 +18,11 @@ struct binary_tree_s
 	struct binary_tree_s *left;
 	struct binary_tree_s *right;
 };
+
 typedef struct binary_tree_s binary_tree_t;
 typedef struct binary_tree_s avl_t;
+
+void binary_tree_print(const binary_tree_t *tree);
 int binary_tree_is_avl(const binary_tree_t *tree);
-binary_tree_t *basic_tree(void);
-binary_tree_t *binary_tree_node(binary_tree_t *parent, int value);
-void binary_tree_print(const binary_tree_t *);
-#endif
+
+#endif /* _BINARY_TREES_H_ */
